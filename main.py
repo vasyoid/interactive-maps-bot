@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler
@@ -41,7 +42,16 @@ if __name__ == '__main__':
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', start_handler))
     dispatcher.add_handler(MessageHandler(filters=Filters.location, callback=location_handler))
-    logging.info("app started")
-    updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
-    updater.bot.setWebhook('https://interactive-maps-bot.herokuapp.com/' + TOKEN)
-    updater.idle()
+    if len(sys.argv) == 2 and sys.argv[1] == "polling":
+        logging.info("app started")
+        updater.start_polling()
+    elif len(sys.argv) == 2 and sys.argv[1] == "webhook":
+        logging.info("app started")
+        updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
+        updater.bot.set_webhook('https://interactive-maps-bot.herokuapp.com/' + TOKEN)
+        updater.idle()
+    else:
+        logging.error(f"\tusage: python {sys.argv[0]} [MODE]")
+        logging.error("\tMODES:")
+        logging.error("\tpolling\t\trun in polling mode (get updates proactively)")
+        logging.error("\twebhook\t\trun in webhook mode (get updates reactively)")
