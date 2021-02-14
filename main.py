@@ -1,4 +1,5 @@
 import logging
+import os
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler
@@ -7,6 +8,9 @@ from telegram.ext.filters import Filters
 
 from transform import Transform
 from image import ImageGenerator
+
+PORT = int(os.environ.get('PORT', 5000))
+TOKEN = "1681865021:AAFbfIlHUtTyBCnSoZznVPq_tIzSybbl9dM"
 
 tm = Transform()
 image_generator = ImageGenerator()
@@ -33,10 +37,11 @@ def location_handler(update: Update, context):
 
 if __name__ == '__main__':
     logging.info("starting app")
-    updater = Updater(token='1681865021:AAFbfIlHUtTyBCnSoZznVPq_tIzSybbl9dM')
+    updater = Updater(token=TOKEN)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', start_handler))
     dispatcher.add_handler(MessageHandler(filters=Filters.location, callback=location_handler))
     logging.info("app started")
-    updater.start_polling()
-
+    updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
+    updater.bot.setWebhook('https://interactive-maps-bot.herokuapp.com/' + TOKEN)
+    updater.idle()
